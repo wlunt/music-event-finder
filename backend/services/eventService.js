@@ -2,6 +2,7 @@
 const songkickAPI = require('./apis/songkickAPI');
 const bandsintownAPI = require('./apis/bandsintownAPI');
 const ticketmasterAPI = require('./apis/ticketmasterAPI');
+const eventbriteAPI = require('./apis/eventbriteAPI'); // Add this line
 const scrapingService = require('./scrapingService');
 
 class EventService {
@@ -14,6 +15,7 @@ class EventService {
       this.getSongkickEvents({ location, genre, date }),
       this.getBandsintownEvents({ location, genre, date }),
       this.getTicketmasterEvents({ location, genre, date }),
+      this.getEventbriteEvents({ location, genre, date }), // Add this line
       this.getScrapedEvents({ location, genre, date })
     ];
     
@@ -71,6 +73,15 @@ class EventService {
       return [];
     }
   }
+
+  async getEventbriteEvents({ location, genre, date }) {
+  try {
+    return await eventbriteAPI.searchEvents({ location, genre, date });
+  } catch (error) {
+    console.log('Eventbrite API failed:', error.message);
+    return [];
+  }
+}
   
   async getScrapedEvents({ location, genre, date }) {
     try {

@@ -57,15 +57,42 @@ const EventFinder = () => {
     }
   ];
 
-  const handleSearch = async () => {
-    setIsLoading(true);
+ const handleSearch = async () => {
+  setIsLoading(true);
+  
+  try {
+    console.log('Calling backend API...');
     
-    // Simulate API call delay
-    setTimeout(() => {
-      setEvents(mockEvents);
-      setIsLoading(false);
-    }, 1500);
-  };
+    const response = await fetch('http://localhost:5000/api/events/search', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        location: searchParams.location,
+        genre: searchParams.genre,
+        date: searchParams.date
+      })
+    });
+    
+    console.log('Response status:', response.status);
+    
+    const data = await response.json();
+    console.log('Backend response:', data);
+    
+    if (data.success) {
+      setEvents(data.events);
+    } else {
+      console.error('Search failed:', data.error);
+      setEvents([]);
+    }
+  } catch (error) {
+    console.error('Error calling backend:', error);
+    setEvents(mockEvents); // Fallback to mock data
+  }
+  
+  setIsLoading(false);
+};
 
   const handleInputChange = (field, value) => {
     setSearchParams(prev => ({

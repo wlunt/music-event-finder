@@ -10,7 +10,10 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-// Simple health check route
+// Import our event service
+const eventService = require('./services/eventService');
+
+// Health check
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'OK', 
@@ -19,36 +22,37 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Simple events search route (for testing)
-app.post('/api/events/search', (req, res) => {
-  const { location, genre, date } = req.body;
-  
-  console.log(`🔍 Search request: ${genre} in ${location} on ${date}`);
-  
-  // Return mock data for now
-  res.json({
-    success: true,
-    message: 'Backend is working!',
-    searchParams: { location, genre, date },
-    events: [
-      {
-        id: 1,
-        title: "Backend Test Event",
-        artist: "API Test Band",
-        venue: "Test Venue",
-        location: location,
-        date: date,
-        genre: genre,
-        source: "Backend API"
-      }
-    ]
-  });
-});
+// Real events search using our service
+app.post('/api/events/search', async (req, res) => {
+  try {
+    const { location, genre, date } = req.body;
+    
+    if (!location || !genre || !date) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        required: ['location', 'genre', 'date']
+      });
+    }
 
-// Error handling
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Something went wrong!' });
+    console.log(`🔍 Searching for events: ${genre} in ${location} on ${date}`);
+    
+    // Call our real event service
+    const events = await eventService.searchEvents({ location, genre, date });
+    
+    res.json({
+      success: true,
+      count: events.length,
+      events: events,
+      searchParams: { location, genre, date }
+    });
+    
+  } catch (error) {
+    console.error('Error searching events:', error);
+    res.status(500).json({
+      error: 'Failed to search events',
+      message: error.message
+    });
+  }
 });
 
 app.listen(PORT, () => {

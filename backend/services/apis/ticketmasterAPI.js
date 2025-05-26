@@ -19,10 +19,12 @@ class TicketmasterAPI {
       // Convert genre to Ticketmaster classification
       const classificationId = this.getGenreClassification(genre);
       
-      // Build search parameters
+      // Build search parameters with enhanced genre keywords
+      const enhancedKeyword = this.enhanceGenreKeyword(genre);
+      
       const params = {
         apikey: this.apiKey,
-        keyword: genre,
+        keyword: enhancedKeyword,
         city: location,
         startDateTime: `${date}T00:00:00Z`,
         endDateTime: `${date}T23:59:59Z`,
@@ -138,6 +140,39 @@ class TicketmasterAPI {
       imageUrl: imageUrl,
       rawData: tmEvent // Keep original data for debugging
     };
+  }
+
+  enhanceGenreKeyword(genre) {
+    const genreEnhancements = {
+      'house': 'house music electronic dance',
+      'techno': 'techno electronic dance music',
+      'drum and bass': 'drum and bass dnb electronic',
+      'dnb': 'drum and bass dnb electronic',
+      'd&b': 'drum and bass dnb electronic',
+      'electronic': 'electronic dance music EDM',
+      'edm': 'electronic dance music EDM',
+      'trance': 'trance electronic dance music',
+      'dubstep': 'dubstep electronic bass music',
+      'hip hop': 'hip hop rap music',
+      'rap': 'hip hop rap music',
+      'rock': 'rock music alternative indie',
+      'indie': 'indie rock alternative music',
+      'pop': 'pop music',
+      'jazz': 'jazz music',
+      'blues': 'blues music',
+      'country': 'country music',
+      'folk': 'folk music acoustic',
+      'metal': 'metal music heavy',
+      'punk': 'punk rock music',
+      'reggae': 'reggae music',
+      'classical': 'classical music orchestra',
+      'ambient': 'ambient electronic music',
+      'minimal': 'minimal techno electronic'
+    };
+
+    const enhanced = genreEnhancements[genre.toLowerCase()] || genre;
+    console.log(`🎵 Enhanced search: "${genre}" → "${enhanced}"`);
+    return enhanced;
   }
 
   getGenreClassification(genre) {
